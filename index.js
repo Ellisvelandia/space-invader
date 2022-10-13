@@ -177,6 +177,9 @@ const keys = {
   space: { pressed: false },
 };
 
+let frames = 0;
+let randomInterval = Math.floor(Math.random() * 500 + 500);
+
 function animate() {
   requestAnimationFrame(animate);
   c.fillStyle = "black";
@@ -194,8 +197,31 @@ function animate() {
 
   grids.forEach((grid) => {
     grid.update();
-    grid.invaders.forEach((invader) => {
+    grid.invaders.forEach((invader, i) => {
       invader.update({ velocity: grid.velocity });
+
+      projectiles.forEach((projectile, j) => {
+        if (
+          projectile.position.y - projectile.radius <=
+            invader.position.y + invader.height &&
+          projectile.position.x + projectile.radius >= invader.position.x &&
+          projectile.position.x - projectile.radius <= invader.position.x  + invader.width &&
+          projectile.position.y + projectile.radius >= invader.position.y
+        ) {
+          setTimeout(() => {
+            const invaderFound = grid.invaders.find(
+              (invader2) => invader2 == invader
+            );
+            const projectileFound = projectiles.find(
+              (projectile2) => projectile2 === projectile
+            );
+            if (invaderFound && projectileFound) {
+              grid.invaders.splice(i, 1);
+              projectiles.splice(j, 1);
+            }
+          }, 0);
+        }
+      });
     });
   });
 
@@ -212,6 +238,16 @@ function animate() {
     player.velocity.x = 0;
     player.rotation = 0;
   }
+
+  // spawning enemies
+  if (frames % randomInterval === 0) {
+    grids.push(new Grid());
+    randomInterval = Math.floor(Math.random() * 500 + 500);
+    frames = 0;
+    console.log(randomInterval);
+  }
+
+  frames++;
 }
 
 animate();
